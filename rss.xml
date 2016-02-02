@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" href="assets/xml/rss.xsl" media="all"?><rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/" version="2.0"><channel><title>Papa Romeo</title><link>http://blog.paparomeo.net/</link><description>This is a demo site for Nikola.</description><atom:link type="application/rss+xml" href="http://blog.paparomeo.net/rss.xml" rel="self"></atom:link><language>en</language><lastBuildDate>Tue, 02 Feb 2016 02:00:16 GMT</lastBuildDate><generator>https://getnikola.com/</generator><docs>http://blogs.law.harvard.edu/tech/rss</docs><item><title>Server Configuration Management With Chef solo</title><link>http://blog.paparomeo.net/posts/server-configuration-management-with-chef-solo/</link><dc:creator>Pedro Romano</dc:creator><description>&lt;div&gt;&lt;p&gt;Having set up one Linux server from scratch too many, I decided to investigate
+&lt;a class="reference external" href="https://en.wikipedia.org/wiki/Configuration_management"&gt;configuration management&lt;/a&gt; solutions and try to
+automatise my setups.&lt;/p&gt;
+&lt;p&gt;I ended up choosing &lt;a class="reference external" href="http://wiki.opscode.com/display/chef/Chef+Solo"&gt;Chef Solo&lt;/a&gt; for the task, due to being a
+standalone solution not requiring a client/server setup. The following
+blog posts served as inspiration and reference for my implementation:&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;&lt;a class="reference external" href="http://www.opinionatedprogrammer.com/2011/06/chef-solo-tutorial-managing-a-single-server-with-chef/"&gt;Chef Solo tutorial: Managing a single server with Chef&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;&lt;a class="reference external" href="http://illuminatedcomputing.com/posts/2012/02/simple-chef-solo-tutorial/"&gt;Simple Chef Solo Tutorial&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Following up my &lt;a class="reference external" href="http://blog.paparomeo.net/posts/minimal-ubuntu-precise/"&gt;previous post&lt;/a&gt; where
+I set up a base minimum Ubuntu installation with a &lt;em&gt;SSH&lt;/em&gt; daemon running on the
+server (a requirement for my solution), I will now describe my implementation.&lt;/p&gt;
+&lt;p&gt;&lt;a class="reference external" href="https://en.wikipedia.org/wiki/Revision_control"&gt;Revision control&lt;/a&gt; is a must
+for any project, so my first step was to create a &lt;a class="reference external" href="https://en.wikipedia.org/wiki/Git_%28software%29"&gt;git&lt;/a&gt; &lt;a class="reference external" href="https://github.com/pmcnr/digitaluna-chef"&gt;repository&lt;/a&gt; on &lt;a class="reference external" href="https://github.com/"&gt;github&lt;/a&gt;
+to maintain the &lt;em&gt;Chef&lt;/em&gt; cookbooks and recipes as well as any additional files
+required by the solution. This also has the added advantage that cloning the
+git repository is an excellent way of deploying these files on the server.&lt;/p&gt;
+&lt;p&gt;The first component of the solution is a &lt;em&gt;bash&lt;/em&gt; &lt;a class="reference external" href="https://github.com/pmcnr/digitaluna-chef/blob/master/bootstrap.sh"&gt;bootstrap script&lt;/a&gt; which
+runs on the local workstation, taking as its argument the remote user (which
+will need to have &lt;tt class="docutils literal"&gt;sudo&lt;/tt&gt; privileges) and server address in the
+&lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;user@remote-ip-or-fqdn&lt;/span&gt;&lt;/tt&gt; format, and through a &lt;em&gt;SSH&lt;/em&gt; session takes care of
+automatising the following steps:&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;Add the local user's public &lt;em&gt;SSH&lt;/em&gt; key as a remote user's authorised key so
+the remote user's password doesn't have to be entered again (this requires
+typing the remote user's password).&lt;/li&gt;
+&lt;li&gt;Update the remote system's package index and upgrade the installed packages
+to the latest available version.&lt;/li&gt;
+&lt;li&gt;Install the &lt;em&gt;git&lt;/em&gt; package and its dependencies.&lt;/li&gt;
+&lt;li&gt;Clone the &lt;em&gt;git&lt;/em&gt; &lt;a class="reference external" href="https://github.com/pmcnr/digitaluna-chef"&gt;repository&lt;/a&gt; and its sub-modules (not wanting to re-invent
+the wheel I make use of some &lt;a class="reference external" href="https://github.com/opscode-cookbooks"&gt;Opscode Public Cookbooks&lt;/a&gt; which are referenced in the &lt;em&gt;git&lt;/em&gt;
+repository as sub-modules).&lt;/li&gt;
+&lt;li&gt;Hand over control to a second &lt;em&gt;bash&lt;/em&gt; &lt;a class="reference external" href="https://github.com/pmcnr/digitaluna-chef/blob/master/install.sh"&gt;installation script&lt;/a&gt; that is
+available in the cloned repository.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Running on the remote server, this &lt;a class="reference external" href="https://github.com/pmcnr/digitaluna-chef/blob/master/install.sh"&gt;installation script&lt;/a&gt; automatises, in turn,
+the following steps:&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;Install the &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;debconf-utils&lt;/span&gt;&lt;/tt&gt; and &lt;tt class="docutils literal"&gt;&lt;span class="pre"&gt;python-software-properties&lt;/span&gt;&lt;/tt&gt; system
+packages which simplify the tasks of scripting the installation of packages
+with interactive prompts and of adding additional package repositories from
+the command line (or in this case from a script).&lt;/li&gt;
+&lt;li&gt;Add the &lt;a class="reference external" href="http://apt.opscode.com/"&gt;OpsCode APT repository&lt;/a&gt; to the system's
+package repositories, from which we'll be able to install the &lt;em&gt;Chef&lt;/em&gt;
+packages.&lt;/li&gt;
+&lt;li&gt;Install the &lt;cite&gt;chef&lt;/cite&gt; package and all its dependencies (the &lt;cite&gt;chef&lt;/cite&gt; package
+includes &lt;em&gt;Chef Solo&lt;/em&gt;), and create a link from its configuration file in our
+repository to its default location at &lt;tt class="docutils literal"&gt;/etc/chef&lt;/tt&gt;.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;Finally, with &lt;em&gt;Chef Solo&lt;/em&gt; installed and configured, and with many thanks to our
+&lt;em&gt;Bash&lt;/em&gt; scripts which took care of bootstrapping our &lt;em&gt;Chef&lt;/em&gt; installation, we can
+now start using &lt;em&gt;Chef&lt;/em&gt; recipies for all the remaining steps! The last line of
+the &lt;a class="reference external" href="https://github.com/pmcnr/digitaluna-chef/blob/master/install.sh"&gt;installation script&lt;/a&gt; simply invokes &lt;cite&gt;chef-solo&lt;/cite&gt; with our default &lt;em&gt;Chef&lt;/em&gt;
+&lt;a class="reference external" href="https://en.wikipedia.org/wiki/JSON"&gt;JSON&lt;/a&gt; &lt;a class="reference external" href="https://github.com/pmcnr/digitaluna-chef/blob/master/solo.json"&gt;configuration file&lt;/a&gt;.&lt;/p&gt;
+&lt;p&gt;The &lt;em&gt;Chef&lt;/em&gt; recipes perform (as they should) the bulk of the server installation
+and configuration (the previous steps were just the minimum required to install
+and configure &lt;em&gt;Chef&lt;/em&gt;). The following are the actions performed by the &lt;em&gt;Chef&lt;/em&gt;
+recipes:&lt;/p&gt;
+&lt;ul class="simple"&gt;
+&lt;li&gt;Disable running the &lt;tt class="docutils literal"&gt;chef&lt;/tt&gt; client service on start-up. Since we will be
+running &lt;em&gt;Chef Solo&lt;/em&gt; and aren't really connected to a &lt;em&gt;Chef&lt;/em&gt; server and so
+having the &lt;em&gt;Chef&lt;/em&gt; client running would be redundant and wasteful.&lt;/li&gt;
+&lt;li&gt;Install the &lt;a class="reference external" href="http://joeyh.name/code/etckeeper/"&gt;etckeeper&lt;/a&gt; package: keeping
+on with the &lt;em&gt;revision control everywhere&lt;/em&gt; mantra, having the server's
+configuration files under &lt;tt class="docutils literal"&gt;/etc&lt;/tt&gt; revision controlled seems like a very good
+idea and &lt;a class="reference external" href="http://joeyh.name/code/etckeeper/"&gt;etckeeper&lt;/a&gt; does this automatically for you! The recipe also tweaks
+the &lt;a class="reference external" href="http://joeyh.name/code/etckeeper/"&gt;etckeeper&lt;/a&gt; configuration to use &lt;a class="reference external" href="https://en.wikipedia.org/wiki/Git_%28software%29"&gt;git&lt;/a&gt; (which we already have
+installed) instead of &lt;a class="reference external" href="https://en.wikipedia.org/wiki/Bazaar_%28software%29"&gt;Bazaar&lt;/a&gt; which is the default
+for the default &lt;a class="reference external" href="https://en.wikipedia.org/wiki/Distributed_revision_control"&gt;DRCS&lt;/a&gt; for Ubuntu
+(although the author prefers &lt;a class="reference external" href="https://en.wikipedia.org/wiki/Git_%28software%29"&gt;git&lt;/a&gt; in the source distribution and recommends
+its use).&lt;/li&gt;
+&lt;li&gt;Install the &lt;a class="reference external" href="http://en.wikipedia.org/wiki/Uncomplicated_Firewall"&gt;ufw&lt;/a&gt;
+&lt;em&gt;(Uncomplicated Firewall)&lt;/em&gt; package. The default recipe blocks all incoming
+ports with the exception of the &lt;em&gt;SSH&lt;/em&gt; port (22).&lt;/li&gt;
+&lt;li&gt;Reconfigure the &lt;em&gt;SSH&lt;/em&gt; daemon to disallow root logins and password
+authentication (it will only allow connections authenticated with a public
+key for non-root users). This and the previous steps are obvious security
+best practices.&lt;/li&gt;
+&lt;li&gt;Install the &lt;cite&gt;acpid&lt;/cite&gt; daemon package to allow host initiated graceful shutdowns
+on KVM virtual machine guests (which is the case of the this system).&lt;/li&gt;
+&lt;li&gt;Install the &lt;a class="reference external" href="http://en.wikipedia.org/wiki/Byobu_%28software%29)"&gt;byobu&lt;/a&gt;
+package to provide an enhanced terminal multiplexer experience when
+interactive sessions with the server are required.&lt;/li&gt;
+&lt;li&gt;Install &lt;a class="reference external" href="https://en.wikipedia.org/wiki/Vim_%28text_editor%29"&gt;vim&lt;/a&gt;.
+Although I belong to the &lt;a class="reference external" href="https://en.wikipedia.org/wiki/Editor_war#Humor"&gt;Church of Emacs&lt;/a&gt;, I am not a
+fundamentalist, and, because of its ubiquity, I tend to use an editor of the
+&lt;a class="reference external" href="https://en.wikipedia.org/wiki/Vi"&gt;vi&lt;/a&gt; persuasion when wearing my systems
+administrator hat.&lt;/li&gt;
+&lt;li&gt;Install &lt;a class="reference external" href="http://htop.sourceforge.net/"&gt;htop&lt;/a&gt; for process and system
+resources monitoring.&lt;/li&gt;
+&lt;li&gt;Install &lt;a class="reference external" href="http://www.vanheusden.com/multitail/"&gt;multitail&lt;/a&gt; &lt;em&gt;(tail on
+steroids!)&lt;/em&gt; for an improved experience when following log files.&lt;/li&gt;
+&lt;li&gt;Finally install the &lt;a class="reference external" href="https://httpd.apache.org/"&gt;Apache2&lt;/a&gt; web server (using
+the default recipe from the &lt;a class="reference external" href="https://github.com/opscode-cookbooks/apache2"&gt;Opscode public
+cookbook&lt;/a&gt;) and reconfigure the
+firewall to allow HTTP (port 80) traffic in.&lt;/li&gt;
+&lt;/ul&gt;
+&lt;p&gt;And that sums it up! A functional &lt;em&gt;Ubuntu 12.04 LTS&lt;/em&gt; system with an &lt;em&gt;Apache2&lt;/em&gt;
+HTTP server setup, fully automatised using &lt;em&gt;Chef Solo&lt;/em&gt; and a couple of
+bootstrap shell scripts.&lt;/p&gt;&lt;/div&gt;</description><category>blog</category><guid>http://blog.paparomeo.net/posts/server-configuration-management-with-chef-solo/</guid><pubDate>Fri, 14 Sep 2012 23:00:00 GMT</pubDate></item><item><title>Minimal Ubuntu Precise</title><link>http://blog.paparomeo.net/posts/minimal-ubuntu-precise/</link><dc:creator>Pedro Romano</dc:creator><description>&lt;div&gt;&lt;p&gt;The purpose of the minimal Ubuntu installation is to server as a base that can
+be customised and configured automatically and reproducibly using a
+&lt;a class="reference external" href="https://en.wikipedia.org/wiki/Comparison_of_open_source_configuration_management_software"&gt;configuration management tool&lt;/a&gt;
+(in my case &lt;a class="reference external" href="https://www.opscode.com/chef"&gt;Chef&lt;/a&gt; in its &lt;a class="reference external" href="http://wiki.opscode.com/display/chef/Chef+Solo"&gt;Solo&lt;/a&gt; incarnation). For virtual
+machines, these manual steps can be easily automated with tools such as
+&lt;a class="reference external" href="https://vagrantup.com/"&gt;Vagrant&lt;/a&gt; or &lt;a class="reference external" href="https://help.ubuntu.com/12.04/serverguide/jeos-and-vmbuilder.html"&gt;Ubuntu's JeOS VM Builder&lt;/a&gt;, but
+since my virtual server plan only supports booting the VM from a CD as the
+deployment method, I chose the minimal Ubuntu installation as the simplest
+alternative for the base installation.&lt;/p&gt;
+&lt;p&gt;These instructions are based on the installation of the &lt;a class="reference external" href="https://help.ubuntu.com/community/Installation/MinimalCD/"&gt;Ubuntu 12.04 LTS
+(Precise Pangolin) Minimal CD&lt;/a&gt; and assume that
+the installed Ubuntu system will be the only one on the machine. After booting
+from the installation medium with the minimal CD image, the following steps
+were executed:&lt;/p&gt;
+&lt;ol class="arabic simple"&gt;
+&lt;li&gt;On the &lt;strong&gt;Installer boot menu&lt;/strong&gt; choose: &lt;tt class="docutils literal"&gt;Install&lt;/tt&gt;&lt;/li&gt;
+&lt;li&gt;On the &lt;strong&gt;Select a language&lt;/strong&gt; screen choose your desired language.&lt;/li&gt;
+&lt;li&gt;On the &lt;strong&gt;Select your location&lt;/strong&gt; screen choose your country, territory or
+area.&lt;/li&gt;
+&lt;li&gt;On the &lt;strong&gt;Configure the keyboard&lt;/strong&gt; screen use one of the available methods to
+choose your keyboard layout.&lt;/li&gt;
+&lt;li&gt;On the &lt;strong&gt;Configure the network&lt;/strong&gt; screen specify your &lt;em&gt;hostname&lt;/em&gt;.&lt;/li&gt;
+&lt;li&gt;On the &lt;strong&gt;Choose a mirror of the Ubuntu archive&lt;/strong&gt; series of screens choose
+the desired Ubuntu mirror to download the packages required for the
+installation. The best mirror is usually the one geographically closest to
+you. If you need to specify an http proxy this should also be done in the
+respective screen (leave the prompt blank for no proxy).&lt;/li&gt;
+&lt;li&gt;On the &lt;strong&gt;Set up users and passwords&lt;/strong&gt; series of screens specify the account
+details for systems default non-root user: full name, username, password
+and whether the user's home directory should be encrypted or not. This user
+will be able to use the &lt;tt class="docutils literal"&gt;sudo&lt;/tt&gt; command to execute commands as &lt;tt class="docutils literal"&gt;root&lt;/tt&gt;.&lt;/li&gt;
+&lt;li&gt;On the &lt;strong&gt;Configure the clock&lt;/strong&gt; confirm if the suggested time zone is correct
+or choose the desired one.&lt;/li&gt;
+&lt;li&gt;On the &lt;strong&gt;Partition disks&lt;/strong&gt; series of screens choose the desired partitioning
+method, and the disk you use to partition for installation, doing if
+necessary any manual adjustments. In the end confirm your choices and write
+the new partitions to the disk.&lt;/li&gt;
+&lt;li&gt;On the &lt;strong&gt;Configuring discovery&lt;/strong&gt; screen when asked how you want to manage
+upgrades on the system choose the option to install security updates
+automatically.&lt;/li&gt;
+&lt;li&gt;On the &lt;strong&gt;Software selection&lt;/strong&gt; screen, choose only the &lt;strong&gt;OpenSSH server&lt;/strong&gt; as
+the software to install.&lt;/li&gt;
+&lt;li&gt;On the &lt;strong&gt;Install the GRUB boot loader on a hard disk&lt;/strong&gt; screen, when asked if
+you want to install the GRUB boot loader to the master boot record, answer
+&lt;strong&gt;Yes&lt;/strong&gt;.&lt;/li&gt;
+&lt;li&gt;On the &lt;strong&gt;Finish the installation&lt;/strong&gt; screen, when asked if the system clock is
+set to UTC, answer &lt;strong&gt;Yes&lt;/strong&gt;.&lt;/li&gt;
+&lt;li&gt;The installation will now be finished. Follow the instruction on the screen
+to reboot the machine into your new installation.&lt;/li&gt;
+&lt;/ol&gt;&lt;/div&gt;</description><category>blog</category><guid>http://blog.paparomeo.net/posts/minimal-ubuntu-precise/</guid><pubDate>Thu, 23 Aug 2012 23:00:00 GMT</pubDate></item><item><title>Hello World</title><link>http://blog.paparomeo.net/posts/hello-world/</link><dc:creator>Pedro Romano</dc:creator><description>&lt;div&gt;&lt;p&gt;Welcome to my new blog where I plan to share interesting tidbits, gleaned from
+my personal pet projects, on subjects potentially useful for others (and as a
+future reference for me).&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Python&lt;/strong&gt; and &lt;strong&gt;Linux&lt;/strong&gt; will be recurring subjects of this blog and provide a
+fair amount of the content since they are two of my main interests.&lt;/p&gt;
+&lt;p&gt;The occasional random thought or opinion piece may also grace these pages.&lt;/p&gt;
+&lt;p&gt;That's all for now. Watch this space!&lt;/p&gt;&lt;/div&gt;</description><category>blog</category><guid>http://blog.paparomeo.net/posts/hello-world/</guid><pubDate>Fri, 17 Aug 2012 23:00:00 GMT</pubDate></item></channel></rss>

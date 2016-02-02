@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<?xml-stylesheet type="text/xsl" href="../assets/xml/rss.xsl" media="all"?><rss xmlns:atom="http://www.w3.org/2005/Atom" xmlns:dc="http://purl.org/dc/elements/1.1/" version="2.0"><channel><title>Papa Romeo (general)</title><link>http://blog.paparomeo.net/</link><description></description><atom:link href="http://blog.paparomeo.net/categories/cat_general.xml" rel="self" type="application/rss+xml"></atom:link><language>en</language><lastBuildDate>Tue, 02 Feb 2016 01:27:07 GMT</lastBuildDate><generator>https://getnikola.com/</generator><docs>http://blogs.law.harvard.edu/tech/rss</docs><item><title>Hello World</title><link>http://blog.paparomeo.net/posts/hello-world/</link><dc:creator>Pedro Romano</dc:creator><description>&lt;div&gt;&lt;p&gt;Welcome to my new blog where I plan to share interesting tidbits, gleaned from
+my personal pet projects, on subjects potentially useful for others (and as a
+future reference for me).&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;Python&lt;/strong&gt; and &lt;strong&gt;Linux&lt;/strong&gt; will be recurring subjects of this blog and provide a
+fair amount of the content since they are two of my main interests.&lt;/p&gt;
+&lt;p&gt;The occasional random thought or opinion piece may also grace these pages.&lt;/p&gt;
+&lt;p&gt;That's all for now. Watch this space!&lt;/p&gt;&lt;/div&gt;</description><category>blog</category><guid>http://blog.paparomeo.net/posts/hello-world/</guid><pubDate>Fri, 17 Aug 2012 23:00:00 GMT</pubDate></item></channel></rss>

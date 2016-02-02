@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html prefix="og: http://ogp.me/ns# article: http://ogp.me/ns/article# " lang="en">
+<head>
+<meta charset="utf-8">
+<base href="http://blog.paparomeo.net/posts/minimal-ubuntu-precise/">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Minimal Ubuntu Precise | Papa Romeo</title>
+<link href="../../assets/css/all-nocdn.css" rel="stylesheet" type="text/css">
+<meta content="#5670d4" name="theme-color">
+<link rel="alternate" type="application/rss+xml" title="RSS" href="../../rss.xml">
+<link rel="canonical" href="http://blog.paparomeo.net/posts/minimal-ubuntu-precise/">
+<!--[if lt IE 9]><script src="../../assets/js/html5.js"></script><![endif]--><meta name="author" content="Pedro Romano">
+<link rel="prev" href="../hello-world/" title="Hello World" type="text/html">
+<link rel="next" href="../server-configuration-management-with-chef-solo/" title="Server Configuration Management With Chef solo" type="text/html">
+<meta property="og:site_name" content="Papa Romeo">
+<meta property="og:title" content="Minimal Ubuntu Precise">
+<meta property="og:url" content="http://blog.paparomeo.net/posts/minimal-ubuntu-precise/">
+<meta property="og:description" content="The purpose of the minimal Ubuntu installation is to server as a base that can
+be customised and configured automatically and reproducibly using a
+configuration management tool
+(in my case Chef in its">
+<meta property="og:type" content="article">
+<meta property="article:published_time" content="2012-08-24T00:00:00+01:00">
+<meta property="article:tag" content="blog">
+</head>
+<body>
+<a href="#content" class="sr-only sr-only-focusable">Skip to main content</a>
+
+<!-- Menubar -->
+
+<nav class="navbar navbar-inverse navbar-static-top"><div class="container">
+<!-- This keeps the margins nice -->
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-navbar" aria-controls="bs-navbar" aria-expanded="false">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="http://blog.paparomeo.net/">
+
+                <span id="blog-title">Papa Romeo</span>
+            </a>
+        </div>
+<!-- /.navbar-header -->
+        <div class="collapse navbar-collapse" id="bs-navbar" aria-expanded="false">
+            <ul class="nav navbar-nav">
+<li>
+<a href="../../archive.html">Archive</a>
+                </li>
+<li>
+<a href="../../categories/">Tags</a>
+                </li>
+<li>
+<a href="../../rss.xml">RSS feed</a>
+
+                
+            </li>
+</ul>
+<ul class="nav navbar-nav navbar-right">
+<li>
+    <a href="index.rst" id="sourcelink">Source</a>
+    </li>
+
+                
+            </ul>
+</div>
+<!-- /.navbar-collapse -->
+    </div>
+<!-- /.container -->
+</nav><!-- End of Menubar --><div class="container" id="content" role="main">
+    <div class="body-content">
+        <!--Body content-->
+        <div class="row">
+            
+            
+<article class="post-text h-entry hentry postpage" itemscope="itemscope" itemtype="http://schema.org/Article"><header><h1 class="p-name entry-title" itemprop="headline name"><a href="." class="u-url">Minimal Ubuntu Precise</a></h1>
+
+        <div class="metadata">
+            <p class="byline author vcard"><span class="byline-name fn">
+                    Pedro Romano
+            </span></p>
+            <p class="dateline"><a href="." rel="bookmark"><time class="published dt-published" datetime="2012-08-24T00:00:00+01:00" itemprop="datePublished" title="2012-08-24 00:00">2012-08-24 00:00</time></a></p>
+                <p class="commentline">
+        
+
+
+            
+        </p>
+<p class="sourceline"><a href="index.rst" id="sourcelink">Source</a></p>
+
+        </div>
+        
+
+    </header><div class="e-content entry-content" itemprop="articleBody text">
+    <div>
+<p>The purpose of the minimal Ubuntu installation is to server as a base that can
+be customised and configured automatically and reproducibly using a
+<a class="reference external" href="https://en.wikipedia.org/wiki/Comparison_of_open_source_configuration_management_software">configuration management tool</a>
+(in my case <a class="reference external" href="https://www.opscode.com/chef">Chef</a> in its <a class="reference external" href="http://wiki.opscode.com/display/chef/Chef+Solo">Solo</a> incarnation). For virtual
+machines, these manual steps can be easily automated with tools such as
+<a class="reference external" href="https://vagrantup.com/">Vagrant</a> or <a class="reference external" href="https://help.ubuntu.com/12.04/serverguide/jeos-and-vmbuilder.html">Ubuntu's JeOS VM Builder</a>, but
+since my virtual server plan only supports booting the VM from a CD as the
+deployment method, I chose the minimal Ubuntu installation as the simplest
+alternative for the base installation.</p>
+<p>These instructions are based on the installation of the <a class="reference external" href="https://help.ubuntu.com/community/Installation/MinimalCD/">Ubuntu 12.04 LTS
+(Precise Pangolin) Minimal CD</a> and assume that
+the installed Ubuntu system will be the only one on the machine. After booting
+from the installation medium with the minimal CD image, the following steps
+were executed:</p>
+<ol class="arabic simple">
+<li>On the <strong>Installer boot menu</strong> choose: <tt class="docutils literal">Install</tt>
+</li>
+<li>On the <strong>Select a language</strong> screen choose your desired language.</li>
+<li>On the <strong>Select your location</strong> screen choose your country, territory or
+area.</li>
+<li>On the <strong>Configure the keyboard</strong> screen use one of the available methods to
+choose your keyboard layout.</li>
+<li>On the <strong>Configure the network</strong> screen specify your <em>hostname</em>.</li>
+<li>On the <strong>Choose a mirror of the Ubuntu archive</strong> series of screens choose
+the desired Ubuntu mirror to download the packages required for the
+installation. The best mirror is usually the one geographically closest to
+you. If you need to specify an http proxy this should also be done in the
+respective screen (leave the prompt blank for no proxy).</li>
+<li>On the <strong>Set up users and passwords</strong> series of screens specify the account
+details for systems default non-root user: full name, username, password
+and whether the user's home directory should be encrypted or not. This user
+will be able to use the <tt class="docutils literal">sudo</tt> command to execute commands as <tt class="docutils literal">root</tt>.</li>
+<li>On the <strong>Configure the clock</strong> confirm if the suggested time zone is correct
+or choose the desired one.</li>
+<li>On the <strong>Partition disks</strong> series of screens choose the desired partitioning
+method, and the disk you use to partition for installation, doing if
+necessary any manual adjustments. In the end confirm your choices and write
+the new partitions to the disk.</li>
+<li>On the <strong>Configuring discovery</strong> screen when asked how you want to manage
+upgrades on the system choose the option to install security updates
+automatically.</li>
+<li>On the <strong>Software selection</strong> screen, choose only the <strong>OpenSSH server</strong> as
+the software to install.</li>
+<li>On the <strong>Install the GRUB boot loader on a hard disk</strong> screen, when asked if
+you want to install the GRUB boot loader to the master boot record, answer
+<strong>Yes</strong>.</li>
+<li>On the <strong>Finish the installation</strong> screen, when asked if the system clock is
+set to UTC, answer <strong>Yes</strong>.</li>
+<li>The installation will now be finished. Follow the instruction on the screen
+to reboot the machine into your new installation.</li>
+</ol>
+</div>
+    </div>
+    <aside class="postpromonav"><nav><ul itemprop="keywords" class="tags">
+<li><a class="tag p-category" href="../../categories/blog/" rel="tag">blog</a></li>
+        </ul>
+<ul class="pager hidden-print">
+<li class="previous">
+                <a href="../hello-world/" rel="prev" title="Hello World">Previous post</a>
+            </li>
+            <li class="next">
+                <a href="../server-configuration-management-with-chef-solo/" rel="next" title="Server Configuration Management With Chef solo">Next post</a>
+            </li>
+        </ul></nav></aside><section class="comments hidden-print"><h2>Comments</h2>
+        
+        
+
+
+        </section></article>
+</div>
+        <!--End of body content-->
+
+        <footer id="footer">
+            Contents © 2016         <a href="mailto:pedro@apaparomeo.net">Pedro Romano</a> - Powered by         <a href="https://getnikola.com" rel="nofollow">Nikola</a>         
+            
+        </footer>
+</div>
+</div>
+
+
+            <script src="../../assets/js/all-nocdn.js"></script><script>$('a.image-reference:not(.islink) img:not(.islink)').parent().colorbox({rel:"gal",maxWidth:"100%",maxHeight:"100%",scalePhotos:true});</script><!-- fancy dates --><script>
+    moment.locale("en");
+    fancydates(0, "YYYY-MM-DD HH:mm");
+    </script><!-- end fancy dates -->
+</body>
+</html>

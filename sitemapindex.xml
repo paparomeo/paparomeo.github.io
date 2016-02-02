@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<sitemapindex
+    xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+    xmlns:xhtml="http://www.w3.org/1999/xhtml"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+                        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+ <sitemap>
+  <loc>http://blog.paparomeo.net/categories/blog.xml</loc>
+  <lastmod>2016-02-02T01:41:00Z</lastmod>
+ </sitemap>
+ <sitemap>
+  <loc>http://blog.paparomeo.net/categories/cat_general.xml</loc>
+  <lastmod>2016-02-02T01:27:00Z</lastmod>
+ </sitemap>
+ <sitemap>
+  <loc>http://blog.paparomeo.net/categories/cat_linux-ubuntu-chef.xml</loc>
+  <lastmod>2016-02-02T01:41:00Z</lastmod>
+ </sitemap>
+ <sitemap>
+  <loc>http://blog.paparomeo.net/categories/cat_linux-ubuntu.xml</loc>
+  <lastmod>2016-02-02T01:33:00Z</lastmod>
+ </sitemap>
+ <sitemap>
+  <loc>http://blog.paparomeo.net/rss.xml</loc>
+  <lastmod>2016-02-02T02:00:00Z</lastmod>
+ </sitemap>
+ <sitemap>
+  <loc>http://blog.paparomeo.net/sitemap.xml</loc>
+  <lastmod>2016-02-02T02:09:00Z</lastmod>
+ </sitemap>
+</sitemapindex>

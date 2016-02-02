@@ -1,0 +1,4 @@
+Sitemap: http://blog.paparomeo.net/sitemapindex.xml
+
+User-Agent: *
+Host: blog.paparomeo.net

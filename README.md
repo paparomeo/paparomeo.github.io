@@ -1,1 +1,0 @@
-# Papa Romeo Blog
